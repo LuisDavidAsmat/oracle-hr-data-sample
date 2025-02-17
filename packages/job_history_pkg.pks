@@ -1,8 +1,22 @@
 -- DEPARTMENTS
 CREATE OR REPLACE PACKAGE job_history_pkg AS
 
-    -- Gets all job histories.
-  PROCEDURE SP_GET_ALL_JOB_HISTORIES (
+PROCEDURE SP_GET_ALL_JOB_HISTORIES 
+    (
+    p_job_histories_cursor OUT SYS_REFCURSOR
+    );
+    
+    PROCEDURE SP_GET_ALL_JOB_HISTORIES_PAGED
+    (
+        p_job_histories_cursor OUT SYS_REFCURSOR,
+        p_offset IN NUMBER,
+        p_limit IN NUMBER
+    );
+            
+
+
+    -- Gets all job histories paged.
+  PROCEDURE SP_GET_ALL_JOB_HISTORIES_PAGED (
     p_page_number IN NUMBER DEFAULT 1,
     p_page_size IN NUMBER DEFAULT 10,
     p_sort_column IN VARCHAR2 DEFAULT 'employee_id',
@@ -11,13 +25,21 @@ CREATE OR REPLACE PACKAGE job_history_pkg AS
     p_total_records OUT NUMBER,
     p_total_pages OUT NUMBER
   );
+  
+      -- Gets a job history by its ID and date.
+  PROCEDURE SP_GET_JOB_HISTORY_BY_EMPLOYEE_ID (
+    p_employee_id IN job_history.employee_id%TYPE,
+    p_job_history_cursor OUT SYS_REFCURSOR
+  );
+  
+  
     
-    -- Gets a job history by its ID.
-  PROCEDURE SP_GET_JOB_HISTORY_BY_ID (
+    -- Gets a job history by its ID and date.
+  /*PROCEDURE SP_GET_JOB_HISTORY_BY_EMPLOYEE_ID_AND_DATE (
     p_employee_id IN job_history.employee_id%TYPE,
     p_start_date IN job_history.start_date%TYPE,
     p_job_history_cursor OUT SYS_REFCURSOR
-  );
+  );*/
   
   -- Creates a new job history.
   /* SP_CREATE_JOB_HISTORY (

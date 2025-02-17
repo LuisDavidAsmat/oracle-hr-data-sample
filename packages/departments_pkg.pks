@@ -1,8 +1,21 @@
 -- DEPARTMENTS
 CREATE OR REPLACE PACKAGE departments_pkg AS
 
-    -- Gets all departments.
+  -- Gets all departments.
   PROCEDURE SP_GET_ALL_DEPARTMENTS (
+    p_departments_cursor OUT SYS_REFCURSOR
+  );
+  
+  
+  PROCEDURE SP_GET_ALL_DEPARTMENTS_PAGED
+  (
+    p_department_cursor OUT SYS_REFCURSOR,
+    p_offset IN NUMBER,
+    p_limit IN NUMBER
+    );
+
+    -- Gets all n departments.
+  PROCEDURE SP_GET_ALL_DEPARTMENTS_WITH_SIZE (
     p_size IN NUMBER,
     p_departments_cursor OUT SYS_REFCURSOR
   );
@@ -34,6 +47,11 @@ CREATE OR REPLACE PACKAGE departments_pkg AS
   PROCEDURE SP_DELETE_DEPARTMENT (
     p_department_id IN departments.department_id%TYPE,
     p_rowcount OUT NUMBER 
+    );
+    
+    PROCEDURE GET_AVERAGE_SALARY_BY_DEPARTMENT(
+        p_avg_salary_cursor OUT SYS_REFCURSOR,
+        p_department_id IN NUMBER
     );
 
 END departments_pkg;

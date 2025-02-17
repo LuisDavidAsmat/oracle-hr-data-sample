@@ -151,3 +151,33 @@ EXCEPTION
 END;
 /
 
+SET SERVEROUTPUT ON
+DECLARE
+  rc SYS_REFCURSOR;
+  v_department_id departments.department_id%TYPE := 10; -- Replace with the desired department ID
+  v_department_name departments.department_name%TYPE;
+  v_average_salary NUMBER;
+BEGIN
+  -- Call the stored procedure
+  departments_pkg.GET_AVERAGE_SALARY_BY_DEPARTMENT(rc, v_department_id);
+
+  -- Fetch and process the results from the cursor
+  LOOP
+    FETCH rc INTO v_department_id, v_department_name, v_average_salary;
+    EXIT WHEN rc%NOTFOUND;
+
+    -- Process the data (e.g., print it)
+    DBMS_OUTPUT.PUT_LINE('Department ID: ' || v_department_id);
+    DBMS_OUTPUT.PUT_LINE('Department Name: ' || v_department_name);
+    DBMS_OUTPUT.PUT_LINE('Average Salary: ' || v_average_salary);
+    DBMS_OUTPUT.PUT_LINE('--------------------');
+  END LOOP;
+
+  -- Close the cursor
+  CLOSE rc;
+
+EXCEPTION
+  WHEN OTHERS THEN
+    DBMS_OUTPUT.PUT_LINE('Error: ' || SQLERRM); -- Handle exceptions
+END;
+/

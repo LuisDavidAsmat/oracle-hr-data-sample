@@ -1,6 +1,28 @@
 CREATE OR REPLACE PACKAGE employees_pkg AS
 
-  PROCEDURE SP_GET_ALL_EMPLOYEES (
+    PROCEDURE SP_GET_EMPLOYEES_COUNT (
+    p_total_count OUT NUMBER
+  );
+  
+  PROCEDURE SP_GET_ALL_EMPLOYEES_PAGED (
+    p_employees_cursor OUT SYS_REFCURSOR,
+    p_offset IN NUMBER,
+    p_limit IN NUMBER
+) ;
+  
+  PROCEDURE SP_GET_ALL_EMPLOYEES_PAGED_BEFORE_12C (
+    p_start_row IN NUMBER,
+    p_page_size IN NUMBER,
+    p_result_set OUT SYS_REFCURSOR
+  );
+  
+
+
+PROCEDURE SP_GET_ALL_EMPLOYEES (
+    p_employees_cursor OUT SYS_REFCURSOR
+  );
+
+  PROCEDURE SP_GET_ALL_EMPLOYEES_WITH_SIZE (
     p_size IN NUMBER,
     p_employees_cursor OUT SYS_REFCURSOR
   );
@@ -41,7 +63,46 @@ CREATE OR REPLACE PACKAGE employees_pkg AS
   PROCEDURE SP_DELETE_EMPLOYEE (
     p_emp_id IN employees.employee_id%TYPE
     );
+    
+    PROCEDURE SP_GET_ALL_EMPLOYEES_BY_DEPARTMENT2(
+        p_employees_cursor OUT SYS_REFCURSOR,
+        p_department_id IN departments.department_id%TYPE       
+    );
+    
+    PROCEDURE SP_GET_ALL_EMPLOYEES_BY_DEPARTMENT(
+        p_employees_cursor OUT SYS_REFCURSOR,
+        p_department_id IN departments.department_id%TYPE,
+        p_offset IN NUMBER,
+        p_limit IN NUMBER
+    );
+    
+    PROCEDURE SP_GET_ALL_EMPLOYEES_BY_JOB(
+        p_employees_cursor OUT SYS_REFCURSOR,
+        p_job_id IN jobs.job_id%TYPE
+    );
 
+    
+    PROCEDURE SP_GET_ALL_EMPLOYEES_BY_JOB_PAGED(
+        p_employees_cursor OUT SYS_REFCURSOR,
+        p_job_id IN jobs.job_id%TYPE,
+        p_offset IN NUMBER,
+        p_limit IN NUMBER
+    );
+    
+    PROCEDURE GET_N_TOP_EMPLOYEES_BY_SALARY(
+        p_number_employees IN NUMBER,
+        p_employees_cursor OUT SYS_REFCURSOR
+        
+    );
+    
+    
+    PROCEDURE GET_EMPLOYEES_BY_SALARY_RANGE 
+    (
+        p_employees_cursor OUT SYS_REFCURSOR,
+        p_min_salary IN NUMBER,
+        p_max_salary IN NUMBER
+    );
+    
   
 
 END employees_pkg;

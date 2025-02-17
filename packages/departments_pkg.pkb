@@ -4,6 +4,41 @@
 CREATE OR REPLACE PACKAGE BODY departments_pkg AS
 
 PROCEDURE SP_GET_ALL_DEPARTMENTS (
+    p_departments_cursor OUT SYS_REFCURSOR
+)
+AS
+BEGIN
+    OPEN p_departments_cursor FOR
+        SELECT department_id, department_name, manager_id, location_id
+        FROM departments;
+
+EXCEPTION
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('Error in SP_GET_ALL_DEPARTMENTS: ' || SQLERRM);
+        RAISE;
+END SP_GET_ALL_DEPARTMENTS;
+
+
+PROCEDURE SP_GET_ALL_DEPARTMENTS_PAGED(
+    p_department_cursor OUT SYS_REFCURSOR,
+    p_offset IN NUMBER,
+    p_limit IN NUMBER
+)
+AS 
+BEGIN
+    OPEN p_department_cursor FOR
+        SELECT department_id,
+            department_name,
+            manager_id,
+            location_id
+            
+        FROM departments
+        ORDER BY department_id
+        OFFSET p_offset ROWS FETCH NEXT p_limit ROWS ONLY;
+END SP_GET_ALL_DEPARTMENTS_PAGED;
+
+
+PROCEDURE SP_GET_ALL_DEPARTMENTS_WITH_SIZE (
     p_size IN NUMBER,
     p_departments_cursor OUT SYS_REFCURSOR
 )
@@ -29,7 +64,7 @@ exception
     WHEN OTHERS THEN
         DBMS_OUTPUT.PUT_LINE('Error in SP_GET_ALL_DEPARTMENTS: ' || SQLERRM);
         raise;
-END SP_GET_ALL_DEPARTMENTS;
+END SP_GET_ALL_DEPARTMENTS_WITH_SIZE;
 
 
 -- get department by id
@@ -168,6 +203,28 @@ EXCEPTION
         ROLLBACK;
         RAISE;
 END SP_DELETE_DEPARTMENT;
+
+PROCEDURE GET_AVERAGE_SALARY_BY_DEPARTMENT(
+        p_avg_salary_cursor OUT SYS_REFCURSOR,
+        p_department_id IN NUMBER
+    )
+    IS 
+        v_dept_counter NUMBER;
+    BEGIN
+        SELECT COUNT(*) INTO v_dept_counter FROM departments WHERE department_id = p_department_id;
+        
+        IF v_dept_counter = 0 THEN
+            RAISE_APPLICATION_ERROR(-20001, 'Department was not found.');
+        END IF;
+        
+        OPEN p_avg_salary_cursor FOR
+            SELECT d.department_id, d.department_name, AVG(e.salary) AS average_salary
+            FROM employees e
+            JOIN departments d ON e.department_id = d.department_id
+            WHERE d.department_id = p_department_id
+            GROUP BY d.department_id, d.department_name;
+    
+END GET_AVERAGE_SALARY_BY_DEPARTMENT;
 
 END departments_pkg;
 /

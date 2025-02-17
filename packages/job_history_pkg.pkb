@@ -2,8 +2,73 @@
 
 CREATE OR REPLACE PACKAGE BODY job_history_pkg 
 AS
-  -- Gets all job histories.
-  PROCEDURE SP_GET_ALL_JOB_HISTORIES (
+
+-- get all job histories
+PROCEDURE SP_GET_ALL_JOB_HISTORIES(
+    p_job_histories_cursor OUT SYS_REFCURSOR
+)
+AS
+BEGIN
+    OPEN p_job_histories_cursor FOR
+        SELECT 
+            employee_id,
+            start_date,
+            end_date,
+            job_id,
+            department_id
+        FROM job_history;
+        
+EXCEPTION
+    WHEN OTHERS THEN
+        RAISE_APPLICATION_ERROR(-2001, 'Error in SP_GET_ALL_JOB_HISTORIES: ' || SQLERRM);
+END  SP_GET_ALL_JOB_HISTORIES;
+
+-- get all job histories paged
+PROCEDURE SP_GET_ALL_JOB_HISTORIES_PAGED(
+    p_job_histories_cursor OUT SYS_REFCURSOR,
+    p_offset IN NUMBER,
+    p_limit IN NUMBER
+)
+AS 
+BEGIN
+    OPEN p_job_histories_cursor FOR
+        SELECT employee_id,
+            start_date,
+            end_date,
+            job_id,
+            department_id
+        FROM job_history
+        OFFSET p_offset ROWS FETCH NEXT p_limit ROWS ONLY;
+END SP_GET_ALL_JOB_HISTORIES_PAGED;
+
+-- get job history by employee id
+PROCEDURE SP_GET_JOB_HISTORY_BY_EMPLOYEE_ID (
+    p_employee_id IN job_history.employee_id%TYPE,
+    p_job_history_cursor OUT SYS_REFCURSOR
+  )
+AS
+BEGIN
+    OPEN p_job_history_cursor FOR 
+        SELECT 
+            employee_id,
+               start_date,
+               end_date,
+               job_id,
+               department_id
+        FROM job_history
+        WHERE employee_id = p_employee_id;
+        
+EXCEPTION
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('Error in SP_GET_JOB_HISTORY_BY_EMPLOYEE_ID: ' || SQLERRM);
+        RAISE;  
+
+
+END SP_GET_JOB_HISTORY_BY_EMPLOYEE_ID;
+
+
+  -- Gets all job histories paged.
+  PROCEDURE SP_GET_ALL_JOB_HISTORIES_PAGED (
     p_page_number IN NUMBER DEFAULT 1,
     p_page_size IN NUMBER DEFAULT 10,
     p_sort_column IN VARCHAR2 DEFAULT 'employee_id',
@@ -52,11 +117,11 @@ EXCEPTION
     WHEN OTHERS THEN
         RAISE_APPLICATION_ERROR(-20003, 
         'Error getting job histories: ' || SUBSTR(SQLERRM, 1, 200));
-END SP_GET_ALL_JOB_HISTORIES;
+END SP_GET_ALL_JOB_HISTORIES_PAGED;
 
 
 
-    PROCEDURE SP_GET_JOB_HISTORY_BY_ID (
+    PROCEDURE SP_GET_JOB_HISTORY_BY_ID_AND_DATE (
         p_employee_id IN job_history.employee_id%TYPE,
         p_start_date IN job_history.start_date%TYPE,
         p_job_history_cursor OUT SYS_REFCURSOR
@@ -96,7 +161,7 @@ END SP_GET_ALL_JOB_HISTORIES;
             WHEN OTHERS THEN
                 RAISE_APPLICATION_ERROR(-20010,
                     'Error retrieving job history: ' || SUBSTR(SQLERRM, 1, 200));
-        END SP_GET_JOB_HISTORY_BY_ID;
+        END SP_GET_JOB_HISTORY_BY_ID_AND_DATE;
     
     
 
